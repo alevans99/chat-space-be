@@ -10,3 +10,5 @@ coverage
 # Benchmarking
 benchmarks/graphs
 notes.txt
+socket-notes.md
+scratch.js
