@@ -1,5 +1,5 @@
 const express = require('express')
-const createApiRouter = require('./routes/api-router')
+const createRoomRouter = require('./routes/room-router')
 const cors = require('cors')
 const http = require('http')
 const { Server } = require('socket.io')
@@ -7,6 +7,8 @@ const app = express()
 app.use(express.json())
 const socketServer = http.createServer(app)
 const ENV = process.env.NODE_ENV || 'development'
+const {MemoryStore} = require('./store/memoryStore')
+const store = new MemoryStore()
 
 /**
  * CORS
@@ -32,16 +34,16 @@ const io = new Server(socketServer, {
  * Socket.io
  */
 
-io.on('connection', (socket) => {
+ io.on('connection', (socket) => {
   socket.emit('connected', 'Success')
 })
 
 /**
  * Express Router
  */
-const apiRouter = createApiRouter()
+const roomRouter = createRoomRouter(store)
 
-app.use('/api', apiRouter)
+app.use('/room', roomRouter)
 
 app.all('/*', (req, res) => {
   res.status(404).send({ message: 'Path not found' })

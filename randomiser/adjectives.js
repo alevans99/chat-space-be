@@ -325,7 +325,7 @@ const adjectives = [
   'fretful',
   'friendly',
   'funny',
-  'fuzzy ',
+  'fuzzy',
   'gabby',
   'gainful',
   'gamy',

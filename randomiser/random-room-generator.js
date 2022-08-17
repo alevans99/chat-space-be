@@ -20,4 +20,4 @@ const randomRoomGenerator = () => {
  
 }
 
-module.exports = randomRoomGenerator
+module.exports = {randomRoomGenerator}
