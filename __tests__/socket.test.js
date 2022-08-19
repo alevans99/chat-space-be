@@ -1,6 +1,6 @@
 const app = require('../app')
 const io = require('socket.io-client')
-
+const request = require('supertest')
 /**
  * Allows you to poll the socket connection to get confirmation when
  * client is connected/disconnected.
@@ -58,6 +58,61 @@ describe('Socket.io', () => {
       return expect(client.connectionMessage).toBe('Success')
     } catch (error) {
       return expect(client.connectionMessage).toBe('Success')
+    }
+  })
+
+  it('Should send back a list of users when joining a room', async () => {
+    let clientSocket
+    try {
+      //Setup client
+      clientSocket = await (await createClient()).clientSocket
+
+      clientSocket.on('join-space', (data) => {
+        clientSocket.disconnect()
+        expect(data.currentUsers).toEqual(['Test'])
+      })
+
+      //Make a request to create a new room
+      const result = await request(app)
+        .post('/room/create')
+        .send({ username: 'Test', clientId: clientSocket.id })
+
+      //Same client should not be added twice
+      clientSocket.emit('join-space', {
+        username: 'Test',
+        room: result.body.newRoomName,
+      })
+    } catch (error) {
+      clientSocket.disconnect()
+      return error
+    }
+  })
+
+  it('Should send back a list of current users when a new user joins', async () => {
+    let clientSocket, clientTwo
+    try {
+      //Setup clients
+      clientSocket = await (await createClient()).clientSocket
+      clientTwo = await (await createClient()).clientSocket
+
+      clientTwo.on('join-space', (data) => {
+        clientSocket.disconnect()
+        clientTwo.disconnect()
+        expect(data.currentUsers).toEqual(['Test', 'Second'])
+      })
+      //Make a request to create a new room
+      const result = await request(app)
+        .post('/room/create')
+        .send({ username: 'Test', clientId: clientSocket.id })
+
+      clientTwo.emit('join-space', {
+        username: 'Second',
+        room: result.body.newRoomName,
+      })
+    } catch (error) {
+      clientSocket.disconnect()
+      clientTwo.disconnect()
+      return error
     }
   })
 })

@@ -7,7 +7,7 @@ const app = express()
 app.use(express.json())
 const socketServer = http.createServer(app)
 const ENV = process.env.NODE_ENV || 'development'
-const {MemoryStore} = require('./store/memoryStore')
+const { MemoryStore } = require('./store/memoryStore')
 const store = new MemoryStore()
 
 /**
@@ -34,8 +34,14 @@ const io = new Server(socketServer, {
  * Socket.io
  */
 
- io.on('connection', (socket) => {
-  socket.emit('connected', 'Success')
+io.on('connection', (client) => {
+  console.log('Client Connected: ', client.id)
+
+  client.emit('connected', 'Success')
+  require('./socket/client-handler')(io, client, store)
+  client.on('disconnect', () => {
+    console.log('Client Disconnected: ')
+  })
 })
 
 /**
