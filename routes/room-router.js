@@ -1,5 +1,5 @@
 const apiRouter = require('express').Router()
-const { createNewRoomId, getUserStatus } = require('../controllers/roomsController')
+const { createNewRoomId, getRoomStatus } = require('../controllers/roomsController')
 const createRouter = (store) => {
   const router = apiRouter
 
@@ -14,12 +14,14 @@ const createRouter = (store) => {
       res.status(405).send({ message: 'Method Not Allowed' })
     })
 
-  router
-    .route('/:roomName/:user')
-    .get(getUserStatus(store))
+    router
+    .route('/status/:roomName')
+    .get(getRoomStatus(store))
     .all((req, res) => {
       res.status(405).send({ message: 'Method Not Allowed' })
     })
+
+
   return router
 }
 

@@ -1,58 +1,39 @@
 const express = require('express')
 const createRoomRouter = require('./routes/room-router')
 const cors = require('cors')
-const http = require('http')
-const { Server } = require('socket.io')
-const app = express()
-app.use(express.json())
-const socketServer = http.createServer(app)
-const ENV = process.env.NODE_ENV || 'development'
-const { MemoryStore } = require('./store/memoryStore')
-const store = new MemoryStore()
+const createUserRouter = require('./routes/user-router')
 
-/**
- * CORS
- */
-const corsConfig =
-  ENV !== 'production'
-    ? {
-        origin: 'http://localhost:8080',
-        optionsSuccessStatus: 200,
-      }
-    : {}
+const createExpressApp = (store) => {
+  const app = express()
+  app.use(express.json())
+  const ENV = process.env.NODE_ENV || 'development'
 
-app.use(cors(corsConfig))
+  /**
+   * CORS
+   */
+  const corsConfig =
+    ENV !== 'production'
+      ? {
+          origin: 'http://localhost:8080',
+          optionsSuccessStatus: 200,
+        }
+      : {}
 
-const io = new Server(socketServer, {
-  cors: {
-    origin: 'http://localhost:8080',
-    methods: ['GET', 'POST'],
-  },
-})
+  app.use(cors(corsConfig))
 
-/**
- * Socket.io
- */
+  /**
+   * Express Router
+   */
+  const roomRouter = createRoomRouter(store)
+  const userRouter = createUserRouter(store)
+  app.use('/room', roomRouter)
+  app.use('/user', userRouter)
 
-io.on('connection', (client) => {
-  console.log('Client Connected: ', client.id)
-
-  client.emit('connected', 'Success')
-  require('./socket/client-handler')(io, client, store)
-  client.on('disconnect', () => {
-    console.log('Client Disconnected: ')
+  app.all('/*', (req, res) => {
+    res.status(404).send({ message: 'Path not found' })
   })
-})
 
-/**
- * Express Router
- */
-const roomRouter = createRoomRouter(store)
+  return app
+}
 
-app.use('/room', roomRouter)
-
-app.all('/*', (req, res) => {
-  res.status(404).send({ message: 'Path not found' })
-})
-
-module.exports = socketServer
+module.exports = createExpressApp

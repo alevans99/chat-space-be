@@ -12,6 +12,7 @@ exports.createNewRoomId = (store) => {
       const newRoomName = randomRoomGenerator()
       const username = req.body.username
       const clientId = req.body.clientId
+
       store.rooms[newRoomName] = {
         createdTimestamp: DateTime.now().toISO(),
         users: [{ username, clientId }],
@@ -23,15 +24,12 @@ exports.createNewRoomId = (store) => {
   }
 }
 
-exports.getUserStatus = (store) => {
-  return async (req, res, next) => {
-    const { user, roomName } = req.params
-    try {
-      const userIndex = store.rooms[roomName].users.findIndex((roomUser) => {
-        return roomUser.username === user
-      })
 
-      res.status(200).send({ status: userIndex !== -1 })
+exports.getRoomStatus = (store) => {
+  return async (req, res, next) => {
+    const { roomName } = req.params
+    try {
+      res.status(200).send({ status: store.rooms[roomName] !== undefined})
     } catch (error) {
       next(error)
     }
