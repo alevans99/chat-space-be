@@ -10,12 +10,12 @@ exports.createNewRoomId = (store) => {
   return async (req, res, next) => {
     try {
       const newRoomName = randomRoomGenerator()
-      const username = req.body.username
-      const clientId = req.body.clientId
+      // const username = req.body.username
+      // const clientId = req.body.clientId
 
       store.rooms[newRoomName] = {
         createdTimestamp: DateTime.now().toISO(),
-        users: [{ username, clientId }],
+        users: [],
       }
       res.status(200).send({ newRoomName, message: 'success', roomCount: store.rooms[newRoomName].users.length })
     } catch (error) {
