@@ -4,31 +4,40 @@ module.exports = (io, client, store) => {
     const room = data.room
     const clientId = data.clientId
 
-    if (store.rooms[room] !== undefined) {
-      const clientIndex = store.rooms[room].users.findIndex((user) => {
-        return user.clientId === clientId
-      })
-
-      if (clientIndex === -1) {
-        //Add the client to the room requested
-        store.rooms[room].users.push({ username, clientId })
-      }
-
-      const currentUsers = []
-      const clients = []
-
-      store.rooms[room].users.forEach((user) => {
-        currentUsers.push(user.username)
-        clients.push(user.clientId)
-      })
+    if (store.doesRoomExist(room)){
+      store.addUserToRoom(room, clientId, username)
       client.join(room)
+      io.to(room).emit('join-space', { newUser: {username, clientId}, currentUsers: store.getCurrentUsers(room)  })
 
-      //Send a list of all current users in the room
-      io.to(room).emit('join-space', { currentUsers })
     }
+
   })
 
   client.on('message', ({ text, room, senderName, timestamp }) => {
     io.to(room).emit('message', {text, senderName, senderId: client.id, timestamp})
+  })
+
+  client.on('leave-space', ({ room }) => {
+    //Get room for client:
+    client.leave(room)
+    //Remove client from local store
+    store.removeClientFromRoom(room, client.id)
+    //Broadcast leave to the rest of the clients in the room
+    io.to(room).emit('leave-space', {clientId: client.id})
+  })
+
+  client.on('disconnecting', () => {
+    //Get room for client:
+    let room = null
+    client.rooms.forEach((item) => {
+      if (item !== client.id) {
+        room = item
+      }
+    })
+    client.leave(room)
+    //Remove client from local store
+    store.removeClientFromRoom(room, client.id)
+    //Broadcast leave to the rest of the clients in the room
+    io.to(room).emit('leave-space', {clientId: client.id})
   })
 }
