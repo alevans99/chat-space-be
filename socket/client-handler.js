@@ -4,17 +4,23 @@ module.exports = (io, client, store) => {
     const room = data.room
     const clientId = data.clientId
 
-    if (store.doesRoomExist(room)){
+    if (store.doesRoomExist(room)) {
       store.addUserToRoom(room, clientId, username)
       client.join(room)
-      io.to(room).emit('join-space', { newUser: {username, clientId}, currentUsers: store.getCurrentUsers(room)  })
-
+      io.to(room).emit('join-space', {
+        newUser: { username, clientId },
+        currentUsers: store.getCurrentUsers(room),
+      })
     }
-
   })
 
   client.on('message', ({ text, room, senderName, timestamp }) => {
-    io.to(room).emit('message', {text, senderName, senderId: client.id, timestamp})
+    io.to(room).emit('message', {
+      text,
+      senderName,
+      senderId: client.id,
+      timestamp,
+    })
   })
 
   client.on('leave-space', ({ room }) => {
@@ -23,7 +29,7 @@ module.exports = (io, client, store) => {
     //Remove client from local store
     store.removeClientFromRoom(room, client.id)
     //Broadcast leave to the rest of the clients in the room
-    io.to(room).emit('leave-space', {clientId: client.id})
+    io.to(room).emit('leave-space', { clientId: client.id })
   })
 
   client.on('disconnecting', () => {
@@ -38,6 +44,6 @@ module.exports = (io, client, store) => {
     //Remove client from local store
     store.removeClientFromRoom(room, client.id)
     //Broadcast leave to the rest of the clients in the room
-    io.to(room).emit('leave-space', {clientId: client.id})
+    io.to(room).emit('leave-space', { clientId: client.id })
   })
 }
