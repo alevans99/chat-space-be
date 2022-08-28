@@ -35,7 +35,7 @@ class MemoryStore {
 
       if (clientIndex === -1) {
         //Add the client to the room requested
-        this.rooms[room].users.push({ username, clientId })
+        this.rooms[room].users.push({ username, clientId, typing: false })
       }
     }
   }

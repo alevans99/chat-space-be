@@ -46,4 +46,10 @@ module.exports = (io, client, store) => {
     //Broadcast leave to the rest of the clients in the room
     io.to(room).emit('leave-space', { clientId: client.id })
   })
+
+  client.on('typing', ({room, typing}) => {
+    //Broadcast typing boolean to the rest of the clients in the room
+    console.log('client: ', client.id, ' typing: ', typing)
+    io.to(room).emit('typing', { clientId: client.id, typing })
+  })
 }
