@@ -38,6 +38,7 @@ class MemoryStore {
         this.rooms[room].users.push({ username, clientId, typing: false })
       }
     }
+    console.log(this.rooms)
   }
 
   doesRoomExist(room) {

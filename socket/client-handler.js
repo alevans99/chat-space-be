@@ -49,7 +49,6 @@ module.exports = (io, client, store) => {
 
   client.on('typing', ({room, typing}) => {
     //Broadcast typing boolean to the rest of the clients in the room
-    console.log('client: ', client.id, ' typing: ', typing)
     io.to(room).emit('typing', { clientId: client.id, typing })
   })
 }

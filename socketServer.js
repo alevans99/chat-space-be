@@ -15,11 +15,9 @@ const createSocketServer = (expressApp, store) => {
   })
 
   io.on('connection', (client) => {
-    console.log('Client connected ', client.id)
     client.emit('connected', 'Success')
     require('./socket/client-handler')(io, client, store)
     client.on('disconnect', () => {
-      console.log('Client Disconnected: ')
     })
   })
   return socketServer

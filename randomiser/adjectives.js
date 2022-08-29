@@ -92,7 +92,6 @@ const adjectives = [
   'bitter',
   'bizarre',
   'black',
-  'bloody',
   'blue',
   'blue-eyed',
   'blushing',
