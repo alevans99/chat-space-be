@@ -2,6 +2,10 @@ const express = require('express')
 const createRoomRouter = require('./routes/room-router')
 const cors = require('cors')
 const createUserRouter = require('./routes/user-router')
+const {
+  handleCustomErrors,
+  handleServerErrors,
+} = require('./controllers/errorsController')
 
 const createExpressApp = (store) => {
   const app = express()
@@ -32,6 +36,9 @@ const createExpressApp = (store) => {
   app.all('/*', (req, res) => {
     res.status(404).send({ message: 'Path not found' })
   })
+
+  app.use(handleCustomErrors)
+  app.use(handleServerErrors)
 
   return app
 }
